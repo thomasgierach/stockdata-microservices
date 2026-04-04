@@ -1,0 +1,91 @@
+services:
+  zookeeper:
+    image: confluentinc/cp-zookeeper:7.5.0
+    container_name: zookeeper
+    environment:
+      ZOOKEEPER_CLIENT_PORT: 2181
+    ports:
+      - "2181:2181"
+
+  kafka:
+    image: confluentinc/cp-kafka:7.5.0
+    container_name: kafka
+    depends_on:
+      - zookeeper
+    ports:
+      - "9092:9092"
+    environment:
+      KAFKA_BROKER_ID: 1
+      KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka:9092
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+      KAFKA_AUTO_CREATE_TOPICS_ENABLE: "true"
+
+  postgres:
+    image: postgres:15
+    container_name: postgres
+    environment:
+      POSTGRES_DB: stocks
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: secret
+    ports:
+      - "5432:5432"
+
+  redis:
+    image: redis:7
+    container_name: redis
+    ports:
+      - "6379:6379"
+
+  stockdata_producer_service:
+    build: 
+      context: .
+      dockerfile: ./stockdata_producer_service/Dockerfile
+    container_name: stockdata_producer_service
+    depends_on:
+      - kafka
+    environment:
+      SPRING_KAFKA_BOOTSTRAP_SERVERS: kafka:9092
+      ALPHAVANTAGE_API_KEY: ${ALPHAVANTAGE_API_KEY}
+      STOCK_SYMBOLS: 
+    ports:
+      - "8081:8081"
+
+  data_consumer_service:
+    build:
+      context: ./
+      dockerfile: ./data_consumer_service/Dockerfile
+    container_name: data_consumer_service
+    depends_on:
+      - kafka
+      - postgres
+      - redis
+    environment:
+      SPRING_KAFKA_BOOTSTRAP_SERVERS: kafka:9092
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/stocks
+      SPRING_DATASOURCE_USERNAME: postgres
+      SPRING_DATASOURCE_PASSWORD: secret
+      SPRING_DATA_REDIS_HOST: redis
+      SPRING_DATA_REDIS_PORT: 6379
+    ports:
+      - "8082:8082"
+
+  stock_query_service:
+    build: 
+      context: ./
+      dockerfile: ./stock_query_service/Dockerfile
+    container_name: stock_query_service
+    depends_on:
+      - postgres
+      - redis
+      - kafka
+    environment:
+      SPRING_KAFKA_BOOTSTRAP_SERVERS: kafka:9092
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/stocks
+      SPRING_DATASOURCE_USERNAME: postgres
+      SPRING_DATASOURCE_PASSWORD: secret
+      SPRING_DATA_REDIS_HOST: redis
+      SPRING_DATA_REDIS_PORT: 6379
+      ALPHAVANTAGE_API_KEY: ${ALPHAVANTAGE_API_KEY}
+    ports:
+      - "8085:8080"

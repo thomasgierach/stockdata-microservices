@@ -1,0 +1,21 @@
+server:
+  port: 8081
+  error.include-message: always
+  error.include-stacktrace: always
+
+spring:
+  kafka:
+    bootstrap-servers: kafka:9092
+    producer:
+      key-serializer: org.apache.kafka.common.serialization.StringSerializer
+      value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
+
+alphavantage:
+  base-url: https://www.alphavantage.co/query
+
+app:
+  kafka:
+    topic: stock-data
+  scheduler:
+    fixed-rate-ms: 60000
+  symbols:

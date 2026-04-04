@@ -1,0 +1,33 @@
+spring:
+  server:
+    port: 8085
+  datasource:
+    url: ${SPRING_DATASOURCE_URL:jdbc:postgresql://localhost:5432/stocks}
+    username: ${SPRING_DATASOURCE_USERNAME:postgres}
+    password: ${SPRING_DATASOURCE_PASSWORD:secret}
+
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: true
+
+  data:
+    redis:
+      host: ${SPRING_DATA_REDIS_HOST:localhost}
+      port: ${SPRING_DATA_REDIS_PORT:6379}
+
+  kafka:
+    bootstrap-servers: kafka:9092
+    producer:
+      key-serializer: org.apache.kafka.common.serialization.StringSerializer
+      value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
+
+alphavantage:
+  base-url: https://www.alphavantage.co
+  
+
+app:
+  kafka:
+    topic: stock-data
+  cache:
+    ttl-seconds: 60
