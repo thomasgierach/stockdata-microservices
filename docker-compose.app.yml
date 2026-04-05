@@ -1,53 +1,63 @@
 services:
-  stockdata_producer_service:
-    build:
-      context: .
-      dockerfile: ./stockdata_producer_service/Dockerfile
-    container_name: stockdata_producer_service
-    depends_on:
-      - kafka
-    environment:
-      SPRING_KAFKA_BOOTSTRAP_SERVERS: kafka:9092
-      ALPHAVANTAGE_API_KEY: ${ALPHAVANTAGE_API_KEY}
-      STOCK_SYMBOLS: ${STOCK_SYMBOLS:-AAPL,MSFT,NVDA}
-    ports:
-      - "8081:8081"
+    stockdata_producer_service:
+      build: 
+        context: .
+        dockerfile: ./stockdata_producer_service/Dockerfile
+      container_name: stockdata_producer_service
+      depends_on:
+        - kafka
+      environment:
+        SPRING_KAFKA_BOOTSTRAP_SERVERS: kafka:9092
+        ALPHAVANTAGE_API_KEY: ${ALPHAVANTAGE_API_KEY:-demo}
+        STOCK_SYMBOLS: ${STOCK_SYMBOLS:-IBM}
+        ALPHAVANTAGE_REQUEST_DELAY_MS: ${ALPHAVANTAGE_REQUEST_DELAY_MS:-15000}
+        SPRING_PROFILES_ACTIVE: ${APP_DATA_MODE:-demo}
+      ports:
+        - "8081:8081"
 
-  data_consumer_service:
-    build:
-      context: .
-      dockerfile: ./data_consumer_service/Dockerfile
-    container_name: data_consumer_service
-    depends_on:
-      - kafka
-      - postgres
-      - redis
-    environment:
-      SPRING_KAFKA_BOOTSTRAP_SERVERS: kafka:9092
-      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/stocks
-      SPRING_DATASOURCE_USERNAME: postgres
-      SPRING_DATASOURCE_PASSWORD: secret
-      SPRING_DATA_REDIS_HOST: redis
-      SPRING_DATA_REDIS_PORT: 6379
-    ports:
-      - "8082:8082"
+    data_consumer_service:
+      build:
+        context: ./
+        dockerfile: ./data_consumer_service/Dockerfile
+      container_name: data_consumer_service
+      depends_on:
+        - kafka
+        - postgres
+        - redis
+      environment:
+        SPRING_KAFKA_BOOTSTRAP_SERVERS: kafka:9092
+        SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/stocks
+        SPRING_DATASOURCE_USERNAME: postgres
+        SPRING_DATASOURCE_PASSWORD: secret
+        SPRING_DATA_REDIS_HOST: redis
+        SPRING_DATA_REDIS_PORT: 6379
+        ALPHAVANTAGE_API_KEY: ${ALPHAVANTAGE_API_KEY:-demo}
+        STOCK_SYMBOLS: ${STOCK_SYMBOLS:-IBM}
+        ALPHAVANTAGE_REQUEST_DELAY_MS: ${ALPHAVANTAGE_REQUEST_DELAY_MS:-15000}
+        SPRING_PROFILES_ACTIVE: ${APP_DATA_MODE:-demo}
+      ports:
+        - "8082:8082"
 
-  stock_query_service:
-    build:
-      context: .
-      dockerfile: ./stock_query_service/Dockerfile
-    container_name: stock_query_service
-    depends_on:
-      - postgres
-      - redis
-      - kafka
-    environment:
-      SPRING_KAFKA_BOOTSTRAP_SERVERS: kafka:9092
-      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/stocks
-      SPRING_DATASOURCE_USERNAME: postgres
-      SPRING_DATASOURCE_PASSWORD: secret
-      SPRING_DATA_REDIS_HOST: redis
-      SPRING_DATA_REDIS_PORT: 6379
-      ALPHAVANTAGE_API_KEY: ${ALPHAVANTAGE_API_KEY}
-    ports:
-      - "8085:8080"
+    stock_query_service:
+      build: 
+        context: ./
+        dockerfile: ./stock_query_service/Dockerfile
+      container_name: stock_query_service
+      depends_on:
+        - postgres
+        - redis
+        - kafka
+      environment:
+        SPRING_KAFKA_BOOTSTRAP_SERVERS: kafka:9092
+        SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/stocks
+        SPRING_DATASOURCE_USERNAME: postgres
+        SPRING_DATASOURCE_PASSWORD: secret
+        SPRING_DATA_REDIS_HOST: redis
+        SPRING_DATA_REDIS_PORT: 6379
+        ALPHAVANTAGE_API_KEY: ${ALPHAVANTAGE_API_KEY:-demo}
+        STOCK_SYMBOLS: ${STOCK_SYMBOLS:-IBM}
+        ALPHAVANTAGE_REQUEST_DELAY_MS: ${ALPHAVANTAGE_REQUEST_DELAY_MS:-15000}
+        SPRING_PROFILES_ACTIVE: ${APP_DATA_MODE:-demo}
+        
+      ports:
+        - "8085:8080"

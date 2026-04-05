@@ -10,7 +10,9 @@ import org.slf4j.LoggerFactory;
 
 import java.util.Arrays;
 import java.util.List;
+import org.springframework.context.annotation.Profile;
 
+@Profile("live")
 @Service
 public class ScheduledStockPublisher {
     private static final Logger log = LoggerFactory.getLogger(ScheduledStockPublisher.class);
@@ -24,6 +26,8 @@ public class ScheduledStockPublisher {
             KafkaTemplate<String, StockEvent> kafkaTemplate,
             @Value("${app.kafka.topic}") String topicName,
             @Value("${app.symbols}") String symbolsCsv) {
+        
+        log.info("ScheduledStockPublisher created");
         this.alphaVantageClient = alphaVantageClient;
         this.kafkaTemplate = kafkaTemplate;
         this.topicName = topicName;
@@ -38,7 +42,7 @@ public class ScheduledStockPublisher {
     public void publishStocks() {
         if (symbols.isEmpty()) {
             log.warn("No stock symbols configured to publish.");
-            
+
             return;
         }
         for (String symbol : symbols) {

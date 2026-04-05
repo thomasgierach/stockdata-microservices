@@ -12,6 +12,9 @@ spring:
 
 alphavantage:
   base-url: https://www.alphavantage.co/query
+  api-key: ${ALPHAVANTAGE_API_KEY:demo}
+  symbols: ${STOCK_SYMBOLS:IBM}
+  request-delay-ms: ${ALPHAVANTAGE_REQUEST_DELAY_MS:15000}
 
 app:
   kafka:
