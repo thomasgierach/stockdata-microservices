@@ -1,4 +1,4 @@
-package com.finddata.stock_query_service.service;
+package findata.stock_query_service;
 
 import findata.common.model.Stock;
 import findata.common.model.StockEvent;
